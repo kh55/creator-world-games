@@ -86,6 +86,9 @@ for (const slug of slugs) {
   });
 
   test(`${slug}: 「戻る」で戻ってもゲームが表示され、JS エラーがない`, async ({ page }) => {
+    // Playwright の Chromium は bfcache を無効化しているため、これは実際には
+    // 通常のリロード相当の経路を検証している。実機での bfcache 復帰確認は
+    // tests/smoke.md の手動確認手順で行う。
     const w = watchPage(page);
     await page.goto(`/games/${slug}/`);
     await page.goto('/about/');

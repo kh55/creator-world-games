@@ -26,10 +26,10 @@ E2E は広告・解析の環境変数を設定せずにビルドした `dist/` �
 
 1. `src/games/<slug>/` を作る。次の 6 ファイルを置く:
    - `meta.ts` — ゲームのメタ情報（slug・タイトル・説明など）
-   - `logic.ts` — 処理本体
+   - `logic.ts` — DOM を使わない純粋なロジック（テスト対象）
    - `logic.test.ts` — `logic.ts` のテスト
-   - `game.ts` — 入力・描画・ループ本体
-   - `Game.astro` — ページ
+   - `game.ts` — 描画・入力・状態遷移
+   - `Game.astro` — `mountGame(meta.slug, create)` を呼ぶだけのスクリプト
    - `guide.md` — 遊び方・操作方法（ページ下部に表示）
 2. `tests/e2e/games/<slug>.spec.ts` に操作の E2E を書く。
 3. `game.ts` はプレイ開始時に `api.started()` を呼び、ゲームオーバーになったときにだけ `api.submitScore(score)` を呼ぶ（それ以外のタイミングでは呼ばない）。

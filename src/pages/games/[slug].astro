@@ -1,0 +1,30 @@
+---
+import type { AstroInstance, MarkdownInstance } from 'astro';
+import AdSlot from '../../components/AdSlot.astro';
+import GameLayout from '../../layouts/GameLayout.astro';
+import type { GameMeta } from '../../lib/game-meta';
+import { env } from '../../lib/site';
+import { games } from '../../lib/registry';
+
+export function getStaticPaths() {
+  return games.map((game) => ({ params: { slug: game.slug }, props: { game } }));
+}
+
+interface Props {
+  game: GameMeta;
+}
+
+const { game } = Astro.props;
+const components = import.meta.glob<AstroInstance>('../../games/*/Game.astro', { eager: true });
+const guides = import.meta.glob<MarkdownInstance<Record<string, never>>>('../../games/*/guide.md', { eager: true });
+const Game = components[`../../games/${game.slug}/Game.astro`].default;
+const Guide = guides[`../../games/${game.slug}/guide.md`].Content;
+const others = games.filter((g) => g.slug !== game.slug);
+---
+
+<GameLayout game={game} others={others}>
+  <Game slot="game" />
+  <Guide slot="guide" />
+  <AdSlot slot="after-guide" adSlot={env.slotGame} />
+  <AdSlot slot="footer-ad" adSlot={env.slotFooter} />
+</GameLayout>

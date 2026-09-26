@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Gtm from '../components/Gtm.astro';
 import { env, SITE } from '../lib/site';
 
 interface Props {
@@ -31,8 +32,18 @@ const beacon = JSON.stringify({ token: env.cfAnalyticsToken });
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {
+      env.adsenseClient && (
+        <script
+          is:inline
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${env.adsenseClient}`}
+          crossorigin="anonymous"></script>
+      )
+    }
   </head>
   <body>
+    {env.gtmId && <Gtm id={env.gtmId} />}
     <header class="site-header">
       <div class="container">
         <a class="brand" href="/">{SITE.name}</a>
@@ -47,7 +58,7 @@ const beacon = JSON.stringify({ token: env.cfAnalyticsToken });
     </main>
     <footer class="site-footer">
       <div class="container">
-        <p>ゲームのスコアはお使いのブラウザにだけ保存されます。</p>
+        <p>ゲームのスコアはお使いのブラウザにだけ保存されます。スコアの送信については<a href="/privacy/">プライバシーポリシー</a>をご覧ください。</p>
         <p><a href="/about/">このサイトについて</a> ・ <a href="/privacy/">プライバシーポリシー</a></p>
         <p>© {new Date().getFullYear()} {SITE.name}</p>
       </div>

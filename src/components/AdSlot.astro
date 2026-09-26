@@ -1,0 +1,33 @@
+---
+import { env } from '../lib/site';
+
+interface Props {
+  adSlot: string;
+}
+
+const { adSlot } = Astro.props;
+const enabled = Boolean(env.adsenseClient && adSlot);
+---
+
+{
+  enabled && (
+    <aside class="ad-slot" aria-label="広告">
+      <span class="ad-label">広告</span>
+      <ins
+        class="adsbygoogle"
+        data-cwg-slot
+        data-ad-client={env.adsenseClient}
+        data-ad-slot={adSlot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+    </aside>
+  )
+}
+
+<script>
+  import { pushAdSlots } from '../lib/ads';
+
+  // スクリプトはページ内で 1 度だけ実行されるので、まだ push していない広告枠をまとめて処理する。
+  // 自動広告が差し込む <ins class="adsbygoogle"> は AdSense 自身が処理するので、自分で置いた枠だけを対象にする
+  pushAdSlots(document.querySelectorAll('ins[data-cwg-slot]:not([data-cwg-pushed])'), window);
+</script>

@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../lib/site';
+---
+
+<BaseLayout title="このサイトについて" description={`${SITE.name} の目的と運営方針です。`}>
+  <h1>このサイトについて</h1>
+  <p>
+    {SITE.name} は、インベーダーやブロック崩しなどのシンプルなゲームを、ブラウザを開くだけで遊べる無料のゲーム集です。
+  </p>
+
+  <h2>インストール・登録は不要</h2>
+  <p>アプリのインストールや会員登録は必要ありません。PC ではキーボード、スマホでは画面のボタンとタップで遊べます。</p>
+
+  <h2>ハイスコアの保存</h2>
+  <p>各ゲームのハイスコアはお使いのブラウザにだけ保存され、当サイトのサーバーへ送信されません。</p>
+
+  <h2>運営</h2>
+  <p>運営: Creator World（creator-world.net）</p>
+  <p>当サイトは広告収入によって運営しています。</p>
+</BaseLayout>

@@ -1,8 +1,40 @@
 ---
+import GameCard from '../components/GameCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { games } from '../lib/registry';
 import { SITE } from '../lib/site';
 ---
 
-<BaseLayout title={SITE.name} description={SITE.tagline}>
-  <h1>{SITE.name}</h1>
+<BaseLayout
+  title={SITE.name}
+  description="インベーダー・ブロック崩し・もぐらたたき・テトリスをブラウザですぐ遊べる無料ゲーム集。登録不要、スマホのタッチ操作にも対応しています。"
+>
+  <section class="hero">
+    <h1>{SITE.name}</h1>
+    <p>{SITE.tagline}</p>
+    <p class="tagline">ログイン不要・ハイスコアはこの端末にだけ保存されます</p>
+  </section>
+
+  <ul class="game-grid">
+    {games.map((g) => <GameCard game={g} />)}
+  </ul>
+  {games.length === 0 && <p>ゲームは準備中です。</p>}
+
+  <section class="intro">
+    <h2>このサイトについて</h2>
+    <p>
+      {SITE.name} は、昔ながらのアーケードゲームをブラウザだけで遊べる無料のゲーム集です。インストールや会員登録は不要で、PC ではキーボード、スマホでは画面のボタンやタップで操作できます。各ゲームのページに遊び方と攻略のコツを載せています。
+    </p>
+  </section>
 </BaseLayout>
+
+<script>
+  import { scores } from '../engine/storage';
+
+  for (const card of document.querySelectorAll<HTMLElement>('.game-card')) {
+    const best = card.querySelector<HTMLElement>('[data-best]');
+    if (!best || !card.dataset.slug) continue;
+    best.textContent = `BEST ${scores.getHighScore(card.dataset.slug)}`;
+    best.hidden = false;
+  }
+</script>

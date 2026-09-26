@@ -1,0 +1,18 @@
+---
+import type { GameMeta } from '../lib/game-meta';
+
+interface Props {
+  game: GameMeta;
+}
+
+const { game } = Astro.props;
+---
+
+<li class="game-card" data-slug={game.slug}>
+  <a href={`/games/${game.slug}/`}>
+    <span class="emoji" aria-hidden="true">{game.icon}</span>
+    <span class="title">{game.title}</span>
+    <span class="desc">{game.description}</span>
+    <span class="best" data-best hidden></span>
+  </a>
+</li>

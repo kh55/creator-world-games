@@ -1,0 +1,58 @@
+---
+import type { GameMeta } from '../lib/game-meta';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  game: GameMeta;
+  others: GameMeta[];
+}
+
+const { game, others } = Astro.props;
+---
+
+<BaseLayout title={game.title} description={game.description}>
+  <nav class="breadcrumb" aria-label="パンくずリスト">
+    <ol>
+      <li><a href="/">トップ</a></li>
+      <li aria-current="page">{game.title}</li>
+    </ol>
+  </nav>
+  <h1>{game.icon} {game.title}</h1>
+  <p class="lead">{game.description}</p>
+
+  <section class="game" data-game={game.slug} aria-label="ゲーム">
+    <div class="game-hud">
+      <span class="hud"><b>SCORE</b> <span data-score>0</span></span>
+      <span class="hud"><b>BEST</b> <span data-best>0</span></span>
+    </div>
+    <div class="stage" data-stage></div>
+    <div class="touchbar" data-touchbar></div>
+    <noscript><p>このゲームを遊ぶには JavaScript を有効にしてください。</p></noscript>
+    <slot name="game" />
+  </section>
+
+  <article class="guide">
+    <slot name="guide" />
+  </article>
+
+  <slot name="after-guide" />
+
+  {
+    others.length > 0 && (
+      <section class="related">
+        <h2>ほかのゲーム</h2>
+        <ul>
+          {others.map((g) => (
+            <li>
+              <a href={`/games/${g.slug}/`}>
+                {g.icon} {g.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <slot name="footer-ad" />
+</BaseLayout>

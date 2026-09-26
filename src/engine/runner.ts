@@ -86,7 +86,13 @@ export function runGame(slug: string, create: CreateGame, els: GameElements, env
           console.error(e);
         }
       }
-      for (const h of loops) h.stop();
+      for (const h of loops) {
+        try {
+          h.stop();
+        } catch (e) {
+          console.error(e);
+        }
+      }
       input.destroy();
       try {
         instance?.destroy?.();

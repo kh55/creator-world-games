@@ -102,4 +102,25 @@ describe('runGame', () => {
     });
     expect(els.stage.textContent).toBe('読み込みに失敗しました。ページを再読み込みしてください。');
   });
+
+  it('loop.stop() が例外を投げても destroy と cleanup を行う', () => {
+    const calls: string[] = [];
+    const throwingLoop: LoopEnv = {
+      requestAnimationFrame: () => 0,
+      cancelAnimationFrame: () => {
+        throw new Error('cancel failed');
+      },
+      isHidden: () => false,
+    };
+    const els = { stage: fakeEl(), touchbar: fakeEl(), score: fakeEl(), best: fakeEl() };
+    const win = new EventTarget() as EventTarget & { dataLayer?: unknown[] };
+    const store = createScoreStore(() => undefined);
+    const handle = runGame('tetris', (_h, api) => {
+      api.loop(() => {});
+      return { destroy: () => calls.push('destroy') };
+    }, els as unknown as GameElements, { win, store, loopEnv: throwingLoop });
+    handle.close();
+    expect(calls).toEqual(['destroy']);
+    expect(els.stage.cleared).toBe(1);
+  });
 });

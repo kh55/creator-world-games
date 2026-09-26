@@ -16,6 +16,16 @@ test('ブロック崩し: Enter で発射できる', async ({ page }) => {
   await expect.poll(() => dataLayerEvents(page)).toEqual([{ event: 'game_start', game_id: 'breakout' }]);
 });
 
+test('ブロック崩し: Space で発射できる', async ({ page }) => {
+  await page.goto('/games/breakout/');
+  await page.locator('h1').click(); // リンク以外をクリックしてフォーカスをページに戻す
+  // Space は押した瞬間をフレームごとに検出するため、1 フレーム以上押し続ける
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(50);
+  await page.keyboard.up('Space');
+  await expect.poll(() => dataLayerEvents(page)).toEqual([{ event: 'game_start', game_id: 'breakout' }]);
+});
+
 // 「リトライ後の発射で game_start を再送する」（fresh フラグのリセット）は、
 // ここでは検証しない。ブロック崩しはボールがパドル中央から真上に発射され、
 // パドルを動かして避けても跳ね返ったブロックの反射でボールが左右にドリフトし、

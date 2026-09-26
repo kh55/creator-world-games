@@ -72,6 +72,7 @@ export const create: CreateGame = (host, api) => {
     lives = 3;
     level = 1;
     baseSpeed = 300;
+    fresh = true;
     buildBricks();
     resetBall();
     api.setScore(0);

@@ -36,6 +36,8 @@ export interface InputOptions {
   pointerTarget?: HTMLElement | null;
   touchbar?: HTMLElement | null;
   doc?: Document;
+  /** false の間はキー入力を無視し、既定動作も止めない（解説までスクロールしている等） */
+  isActive?: () => boolean;
 }
 
 export interface GameInput {
@@ -49,11 +51,13 @@ export interface GameInput {
 
 const INTERACTIVE = 'a, button, input, select, textarea, summary, [contenteditable]';
 
-function isForeignControl(target: EventTarget | null, touchbar: HTMLElement | null): boolean {
+function isForeignControl(target: EventTarget | null, touchbar: HTMLElement | null, pointerTarget: HTMLElement | null): boolean {
   const el = target as (Element & { closest?: (s: string) => Element | null }) | null;
   const control = el?.closest?.(INTERACTIVE) ?? null;
   if (!control) return false;
-  return !(touchbar && touchbar.contains(control));
+  const inTouchbar = !!(touchbar && touchbar.contains(control));
+  const inPointerTarget = !!(pointerTarget && pointerTarget.contains(control));
+  return !(inTouchbar || inPointerTarget);
 }
 
 interface ListenerRecord {
@@ -67,6 +71,7 @@ export function createInput(opts: InputOptions = {}): GameInput {
   const keyTarget = opts.keyTarget ?? window;
   const pointerTarget = opts.pointerTarget ?? null;
   const touchbar = opts.touchbar ?? null;
+  const isActive = opts.isActive ?? (() => true);
   const keys: Record<string, boolean> = {}; // e.code -> bool
   const actions: Record<string, number> = {}; // action -> count of holders
   let pointerCbs: ((p: PointerInfo) => void)[] = [];
@@ -84,7 +89,8 @@ export function createInput(opts: InputOptions = {}): GameInput {
   }
 
   function onKeyDown(e: Event) {
-    if (isForeignControl(e.target, touchbar)) return;
+    if (isForeignControl(e.target, touchbar, pointerTarget)) return;
+    if (!isActive()) return;
     const code = (e as KeyboardEvent).code;
     const a = KEYMAP[code];
     if (a) {
@@ -116,6 +122,16 @@ export function createInput(opts: InputOptions = {}): GameInput {
 
   if (pointerTarget) {
     on(pointerTarget, 'pointerdown', ((e: PointerEvent) => {
+      const doc = opts.doc ?? (typeof document !== 'undefined' ? document : undefined);
+      const active = doc?.activeElement as (Element & { blur?: () => void }) | null | undefined;
+      if (
+        active &&
+        active !== doc?.body &&
+        !pointerTarget!.contains(active) &&
+        !(touchbar && touchbar.contains(active))
+      ) {
+        active.blur?.();
+      }
       e.preventDefault();
       const p = relXY(e);
       pointerCbs.forEach((f) => f({ type: 'down', x: p.x, y: p.y }));

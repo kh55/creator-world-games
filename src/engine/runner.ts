@@ -31,12 +31,20 @@ export interface RunnerEnv {
   store: ScoreStore;
   loopEnv?: LoopEnv;
   doc?: Document;
+  /** false の間はキー入力を無視する（例: ゲームの stage が画面外にスクロールしている） */
+  isActive?: () => boolean;
 }
 
 export function runGame(slug: string, create: CreateGame, els: GameElements, env: RunnerEnv): { close(): void } {
   const { win, store } = env;
   const track = (data: Record<string, unknown>) => (win.dataLayer = win.dataLayer ?? []).push(data);
-  const input = createInput({ keyTarget: win, pointerTarget: els.stage, touchbar: els.touchbar, doc: env.doc });
+  const input = createInput({
+    keyTarget: win,
+    pointerTarget: els.stage,
+    touchbar: els.touchbar,
+    doc: env.doc,
+    isActive: env.isActive,
+  });
   const loops: LoopHandle[] = [];
   const quitCbs: (() => void)[] = [];
   let instance: GameInstance;
@@ -113,8 +121,31 @@ export function mountGame(slug: string, create: CreateGame): void {
   const score = q('[data-score]');
   const best = q('[data-best]');
   if (!stage || !touchbar || !score || !best) return;
-  const handle = runGame(slug, create, { stage, touchbar, score, best }, { win: window, store: scores });
-  window.addEventListener('pagehide', () => handle.close());
+
+  // 解説までスクロールして stage が画面外に出ている間は、↑↓・Space などのキー入力をページのスクロールに譲る（Ruling R6）
+  let visible = true;
+  let observer: IntersectionObserver | undefined;
+  const section = stage.closest<HTMLElement>('[data-game]');
+  if (section && typeof IntersectionObserver !== 'undefined') {
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) visible = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(section);
+  }
+
+  const handle = runGame(
+    slug,
+    create,
+    { stage, touchbar, score, best },
+    { win: window, store: scores, isActive: () => visible },
+  );
+  window.addEventListener('pagehide', () => {
+    observer?.disconnect();
+    handle.close();
+  });
   // 「戻る」で bfcache から復帰したときは片付け済みなので、読み込み直して起動し直す
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) window.location.reload();

@@ -103,6 +103,28 @@ describe('runGame', () => {
     expect(els.stage.textContent).toBe('読み込みに失敗しました。ページを再読み込みしてください。');
   });
 
+  it('isActive を createInput に渡し、false の間はキー入力を無視する（Ruling R6）', () => {
+    const els = { stage: fakeEl(), touchbar: fakeEl(), score: fakeEl(), best: fakeEl() };
+    const win = new EventTarget() as EventTarget & { dataLayer?: unknown[] };
+    const store = createScoreStore(() => undefined);
+    let active = false;
+    let api!: Parameters<CreateGame>[1];
+    runGame('tetris', (_h, a) => void (api = a), els as unknown as GameElements, {
+      win,
+      store,
+      loopEnv: noopLoop,
+      isActive: () => active,
+    });
+    const e = new Event('keydown', { cancelable: true });
+    Object.defineProperty(e, 'code', { value: 'ArrowDown' });
+    Object.defineProperty(e, 'target', { value: null });
+    win.dispatchEvent(e);
+    expect(api.input.isDown('down')).toBe(false);
+    active = true;
+    win.dispatchEvent(e);
+    expect(api.input.isDown('down')).toBe(true);
+  });
+
   it('loop.stop() が例外を投げても destroy と cleanup を行う', () => {
     const calls: string[] = [];
     const throwingLoop: LoopEnv = {

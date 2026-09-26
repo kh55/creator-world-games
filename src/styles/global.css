@@ -1,0 +1,127 @@
+:root {
+  --neon: #39ff14;
+  --neon-dim: #1f7a13;
+  --card: #0b1408;
+  --line: #143d10;
+  --bg: #000;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--neon);
+  font-family: 'Courier New', monospace;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.7;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--neon);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.site-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.site-header .container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+}
+.brand {
+  font-weight: 700;
+  color: var(--neon);
+  text-decoration: none;
+}
+.site-header nav {
+  display: flex;
+  gap: 16px;
+  font-size: 0.9rem;
+}
+
+main.container {
+  padding-top: 24px;
+  padding-bottom: 48px;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--neon-dim);
+  font-size: 0.85rem;
+  padding: 24px 0;
+}
+
+.breadcrumb ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--neon-dim);
+}
+.breadcrumb li + li::before {
+  content: '›';
+  margin-right: 4px;
+}
+
+.ad-slot {
+  margin: 24px 0;
+  min-height: 280px;
+}
+.ad-slot ins {
+  display: block;
+  min-height: 250px;
+}
+.ad-label {
+  font-size: 0.75rem;
+  color: var(--neon-dim);
+}
+
+.guide {
+  margin-top: 32px;
+}
+.guide h2 {
+  font-size: 1.2rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+
+.related ul {
+  padding-left: 1.2em;
+}

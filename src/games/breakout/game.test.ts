@@ -106,3 +106,76 @@ describe('breakout game.ts: リトライ後の game_start 再送（I1）', () =>
     expect(api.started).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('breakout game.ts: Space（fire）で発射・リトライ', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function setup() {
+    stubDocument();
+    const host = { appendChild: () => {}, replaceChildren: () => {} } as unknown as HTMLElement;
+    const env = fakeApi();
+    create(host, env.api);
+    return env;
+  }
+
+  /** 大きな dt で上壁に跳ね返してから画面外まで落とし、ライフを 1 つ失わせる */
+  function dropBall(frame: (dt: number) => void) {
+    frame(5);
+    frame(5);
+  }
+
+  it('待機中に Space を押すと発射して api.started() を呼ぶ', () => {
+    const { api, input, frame } = setup();
+    frame(0.016);
+    expect(api.started).not.toHaveBeenCalled();
+    input.isDownMap.fire = true;
+    frame(0.016);
+    expect(api.started).toHaveBeenCalledTimes(1);
+  });
+
+  it('ページを開いた時点で Space が押されたままでも発射しない', () => {
+    stubDocument();
+    const host = { appendChild: () => {}, replaceChildren: () => {} } as unknown as HTMLElement;
+    const { api, input, frame } = fakeApi();
+    input.isDownMap.fire = true;
+    create(host, api);
+    frame(0.016);
+    expect(api.started).not.toHaveBeenCalled();
+  });
+
+  it('Space を押しっぱなしのままではリトライせず、押し直すとリトライする', () => {
+    const { api, input, frame } = setup();
+    input.isDownMap.fire = true;
+    frame(0.016); // 発射
+    for (let life = 0; life < 3; life++) {
+      dropBall(frame);
+      if (life < 2) {
+        // 次のライフも Space で発射する（いったん離して押し直す）
+        input.isDownMap.fire = false;
+        frame(0.016);
+        input.isDownMap.fire = true;
+        frame(0.016);
+      }
+    }
+    expect(api.submitScore).toHaveBeenCalledTimes(1);
+    const setScoreCalls = vi.mocked(api.setScore).mock.calls.length;
+
+    // 押しっぱなしのままではリトライしない
+    frame(0.016);
+    expect(vi.mocked(api.setScore).mock.calls.length).toBe(setScoreCalls);
+
+    // 離して押し直すとリトライ（startGame が setScore(0) を呼ぶ）
+    input.isDownMap.fire = false;
+    frame(0.016);
+    input.isDownMap.fire = true;
+    frame(0.016);
+    expect(vi.mocked(api.setScore).mock.calls.at(-1)).toEqual([0]);
+
+    // リトライ後、もう一度押し直すと発射して 2 回目の game_start を送る
+    input.isDownMap.fire = false;
+    frame(0.016);
+    input.isDownMap.fire = true;
+    frame(0.016);
+    expect(api.started).toHaveBeenCalledTimes(2);
+  });
+});

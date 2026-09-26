@@ -100,10 +100,13 @@ export const create: CreateGame = (host, api) => {
     const scale = W / rectW;
     paddle.x = p.x * scale - paddle.w / 2;
   });
-  api.input.onStart(() => {
+  function handleStart() {
     if (state === STATE.READY) launch();
     else if (state === STATE.OVER || state === STATE.CLEAR) startGame();
-  });
+  }
+  api.input.onStart(handleStart);
+  // Space（fire）でも発射・リトライする。押した瞬間だけ反応させ、押しっぱなしでは繰り返さない
+  let prevFire = api.input.isDown('fire');
   api.input.addButton({ label: '◀', action: 'left', ariaLabel: '左' });
   api.input.addButton({ label: '▶', action: 'right', ariaLabel: '右' });
 
@@ -112,6 +115,10 @@ export const create: CreateGame = (host, api) => {
   }
 
   const h = api.loop((dt) => {
+    const fire = api.input.isDown('fire');
+    if (fire && !prevFire) handleStart();
+    prevFire = fire;
+
     // キーでのパドル移動
     if (api.input.isDown('left')) paddle.x -= 420 * dt;
     if (api.input.isDown('right')) paddle.x += 420 * dt;

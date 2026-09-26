@@ -1,0 +1,27 @@
+---
+import { isGtmId } from '../lib/gtm';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+if (!isGtmId(id)) throw new Error(`PUBLIC_GTM_ID の形式が正しくありません: "${id}"（例: GTM-ABC1234）`);
+---
+
+<noscript
+  ><iframe
+    src={`https://www.googletagmanager.com/ns.html?id=${id}`}
+    height="0"
+    width="0"
+    style="display:none;visibility:hidden"
+    title="Google Tag Manager"></iframe></noscript
+>
+<div data-gtm-id={id} hidden></div>
+
+<script>
+  import { bootGtm } from '../lib/gtm';
+
+  const id = document.querySelector<HTMLElement>('[data-gtm-id]')?.dataset.gtmId;
+  if (id) bootGtm<HTMLScriptElement>(window, document, id);
+</script>

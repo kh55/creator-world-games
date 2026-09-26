@@ -1,7 +1,9 @@
 ---
 import type { AstroInstance, MarkdownInstance } from 'astro';
+import AdSlot from '../../components/AdSlot.astro';
 import GameLayout from '../../layouts/GameLayout.astro';
 import type { GameMeta } from '../../lib/game-meta';
+import { env } from '../../lib/site';
 import { games } from '../../lib/registry';
 
 export function getStaticPaths() {
@@ -23,4 +25,6 @@ const others = games.filter((g) => g.slug !== game.slug);
 <GameLayout game={game} others={others}>
   <Game slot="game" />
   <Guide slot="guide" />
+  <AdSlot slot="after-guide" adSlot={env.slotGame} />
+  <AdSlot slot="footer-ad" adSlot={env.slotFooter} />
 </GameLayout>

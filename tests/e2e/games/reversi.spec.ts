@@ -59,6 +59,10 @@ test('リバーシ: 終局まで打つと game_over を 1 回送り、盤面の�
   const [black, white] = [Number(m[1]), Number(m[2])];
   expect(overs[0].score).toBe(black > white ? black : 0);
 
+  // 最後の一手の Enter を押し続けたときのキーリピートでは、結果を消さない
+  await page.locator(`${cells}[data-name="d3"]`).dispatchEvent('keydown', { key: 'Enter', repeat: true, bubbles: true });
+  await expect(again).toBeVisible();
+
   // 終局後に盤面のマスをタップ → 新しい局。タップしたマスに石は置かれない
   await page.locator(`${cells}[data-name="d3"]`).click();
   await expect(page.locator('.reversi-counts')).toHaveText('黒 2 / 白 2');

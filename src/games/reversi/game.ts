@@ -200,6 +200,7 @@ export const create: CreateGame = (host, api) => {
       if (!isActivationKey(e)) return;
       e.preventDefault();
       e.stopPropagation();
+      if (e.repeat) return; // 押しっぱなしのキーリピートでは打たない・リトライしない
       if (phase === 'over') retry();
       else playerMove(x, y);
     });
@@ -209,6 +210,7 @@ export const create: CreateGame = (host, api) => {
     if (!isActivationKey(e)) return;
     e.preventDefault();
     e.stopPropagation();
+    if (e.repeat) return;
     retry();
   });
   // 終局後はステージのタップや Enter でも新しい局を始める（プレイ中は無視）
